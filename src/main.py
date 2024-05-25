@@ -1,17 +1,15 @@
 #!/usr/bin/python3
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import os
 import argparse
-import re
+import multiprocessing
+from urllib.parse import urlparse
+
 import pymp
 import requests
 import markdownify
-import multiprocessing
-from lxml import html
-
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
 
 DIR_ARCTICLE = 'article'
 DIR_FAVORITES = 'favorites'
@@ -29,7 +27,7 @@ def callback(el):
         return None
 
 
-class habrArticleSrcDownloader():
+class habrArticleSrcDownloader:
 
     def __init__(self):
         self.dir_author = ''
@@ -117,8 +115,9 @@ class habrArticleSrcDownloader():
 
         if args.meta_information:
             try:
-                article_createtime = url_soup.find('span',
-                                                   {'class': 'tm-article-datetime-published'}).find('time').get('title')
+                article_createtime = (
+                    url_soup.find('span', {'class': 'tm-article-datetime-published'}).find('time').get('title')
+                )
                 article_author = url_soup.find('a', {'class': 'tm-user-info__username'}).get('href').split('/')
                 text += f"<p>Url: {url}</p>\n<p>Author: {article_author[len(article_author) - 2]}</p>\n<p>Date: {article_createtime}</p>\n"
             except:
@@ -218,7 +217,7 @@ class habrArticleSrcDownloader():
         print(f"[info]: Будет загружено: {len(self.posts)} статей.")
 
         with pymp.Parallel(cores) as pmp:
-            #for p in self.posts :
+            # for p in self.posts :
             for i in pmp.range(0, len(self.posts)):
                 p = self.posts[i]
                 if not args.quiet:
@@ -258,10 +257,24 @@ class habrArticleSrcDownloader():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Скрипт для скачивания статей с https://habr.com/")
     parser.add_argument('-q', '--quiet', help="Quiet mode", action='store_true')
-    parser.add_argument('-l', '--local-pictures',
-                        help="Использовать абсолютный путь к изображениям в сохранённых файлах", action='store_true')
-    parser.add_argument('-i', '--meta-information', help="Добавить мета-информацию о статье в файл", action='store_true')
-    parser.add_argument('-j', '--multiprocessing-cpu', help=f"Количество ядер для параллельного скачивания статей (default: {multiprocessing.cpu_count()})", type=int, default=multiprocessing.cpu_count(), dest='cores', choices=range(1, multiprocessing.cpu_count()+1))
+    parser.add_argument(
+        '-l',
+        '--local-pictures',
+        help="Использовать абсолютный путь к изображениям в сохранённых файлах",
+        action='store_true',
+    )
+    parser.add_argument(
+        '-i', '--meta-information', help="Добавить мета-информацию о статье в файл", action='store_true'
+    )
+    parser.add_argument(
+        '-j',
+        '--multiprocessing-cpu',
+        help=f"Количество ядер для параллельного скачивания статей (default: {multiprocessing.cpu_count()})",
+        type=int,
+        default=multiprocessing.cpu_count(),
+        dest='cores',
+        choices=range(1, multiprocessing.cpu_count() + 1),
+    )
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-u', help="Скачать статьи пользователя", type=str, dest='user_name_for_articles')
