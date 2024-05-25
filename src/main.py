@@ -73,7 +73,10 @@ class habrArticleSrcDownloader():
 
         for c in comments:
             try:
-                r = requests.get(c.get('href'))
+                r = requests.get(c.get('href'), timeout=120)
+                if r is None:
+                    print("[error]: Ошибка получения статьи: ", c.get('href'))
+                    return
             except requests.exceptions.RequestException:
                 print("[error]: Ошибка получения статьи: ", c.get('href'))
                 return
@@ -84,7 +87,10 @@ class habrArticleSrcDownloader():
 
     def get_article(self, url, name=None):
         try:
-            r = requests.get(url)
+            r = requests.get(url, timeout=120)
+            if r is None:
+                print("[error]: Ошибка получения статьи: ", url)
+                return
         except requests.exceptions.RequestException:
             print("[error]: Ошибка получения статьи: ", url)
             return
@@ -155,7 +161,10 @@ class habrArticleSrcDownloader():
         for link in pictures:
             if link.get('data-src'):
                 try:
-                    img_data = requests.get(link.get('data-src')).content
+                    img_data = requests.get(link.get('data-src'), timeout=120).content
+                    if img_data is None:
+                        print("[error]: Ошибка получения картинки: ", link.get('data-src'))
+                        return
 
                     a = urlparse(link.get('data-src'))
 
@@ -172,7 +181,10 @@ class habrArticleSrcDownloader():
 
     def get_articles(self, url):
         try:
-            r = requests.get(url)
+            r = requests.get(url, timeout=120)
+            if r is None:
+                print("[error]: Ошибка получения статей: ", url)
+                return
         except requests.exceptions.RequestException:
             print("[error]: Ошибка получения статей: ", url)
             return
@@ -185,7 +197,10 @@ class habrArticleSrcDownloader():
         page = 2
         while True:
             try:
-                r = requests.get(f'{url}page{page}')
+                r = requests.get(f'{url}page{page}', timeout=120)
+                if r is None:
+                    print("[error]: Ошибка получения статей: ", url)
+                    return
             except requests.exceptions.RequestException:
                 print("[error]: Ошибка получения статей: ", url)
                 return
