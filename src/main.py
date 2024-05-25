@@ -170,7 +170,7 @@ class habrArticleSrcDownloader():
                 if link.get('data-src'):
                     print(link.get('data-src'), file=f)
 
-    def get_articles(self, url, type_articles):
+    def get_articles(self, url):
         try:
             r = requests.get(url)
         except requests.exceptions.RequestException:
@@ -199,10 +199,10 @@ class habrArticleSrcDownloader():
 
             page += 1
 
-    def parse_articles(self, type_articles):
+    def parse_articles(self, cores):
         print(f"[info]: Будет загружено: {len(self.posts)} статей.")
 
-        with pymp.Parallel(multiprocessing.cpu_count()) as pmp:
+        with pymp.Parallel(cores) as pmp:
             #for p in self.posts :
             for i in pmp.range(0, len(self.posts)):
                 p = self.posts[i]
@@ -223,7 +223,7 @@ class habrArticleSrcDownloader():
                 # выходим из директории статьи
                 os.chdir('../')
 
-    def main(self, url, dir, type_articles):
+    def main(self, url, dir, cores):
         # создаем папку для статей
         self.create_dir(dir)
         os.chdir(dir)
@@ -233,9 +233,9 @@ class habrArticleSrcDownloader():
         self.create_dir(self.dir_author)
         os.chdir(self.dir_author)
 
-        self.get_articles(url, type_articles)
+        self.get_articles(url)
 
-        self.parse_articles(type_articles)
+        self.parse_articles(cores)
 
         os.chdir('../')
 
@@ -246,6 +246,7 @@ if __name__ == '__main__':
     parser.add_argument('-l', '--local-pictures',
                         help="Использовать абсолютный путь к изображениям в сохранённых файлах", action='store_true')
     parser.add_argument('-i', '--meta-information', help="Добавить мета-информацию о статье в файл", action='store_true')
+    parser.add_argument('-j', '--multiprocessing-cpu', help=f"Количество ядер для параллельного скачивания статей (default: {multiprocessing.cpu_count()})", type=int, default=multiprocessing.cpu_count(), dest='cores', choices=range(1, multiprocessing.cpu_count()+1))
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-u', help="Скачать статьи пользователя", type=str, dest='user_name_for_articles')
@@ -271,7 +272,7 @@ if __name__ == '__main__':
     habrSD = habrArticleSrcDownloader()
     try:
         if not args.article_id:
-            habrSD.main("https://habr.com/ru/users/" + output_name, output, type_articles)
+            habrSD.main("https://habr.com/ru/users/" + output_name, output, args.cores)
         else:
             habrSD.get_article("https://habr.com/ru/post/" + output_name)
     except Exception as ex:
