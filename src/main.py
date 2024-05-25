@@ -93,7 +93,7 @@ class habrArticleSrcDownloader():
         comment = self.get_comments(url_soup)
 
         posts = url_soup.findAll('div', {'class': 'tm-article-body'})
-        pictures = url_soup.findAll('img')
+        pictures = url_soup.findAll('img', class_="")
         video = url_soup.findAll('div', {'class': 'tm-iframe_temp'})
 
         # одиночное скачивание статьи
