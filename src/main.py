@@ -9,7 +9,6 @@ import requests
 import markdownify
 import multiprocessing
 from lxml import html
-import math
 
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
@@ -171,27 +170,7 @@ class habrArticleSrcDownloader():
                 if link.get('data-src'):
                     print(link.get('data-src'), file=f)
 
-    def define_numer_of_pages(self, url, type_articles):
-        r = requests.get(url)
-        url_soup = BeautifulSoup(r.text, 'lxml')
-        #spans = url_soup.find_all("span", {"class": "tm-tabs__tab-counter"})
-        spans = url_soup.find_all("span", {"class": "tm-tabs__tab-item"})
-        
-        if type_articles == 'u':
-            span = spans[1]
-        elif type_articles == 'f':
-            span = spans[3]
-        elif type_articles == 's':
-            span = spans[1]
-        
-        span = span.find('span')
-        span_value = re.sub(r'[^0-9]', '', span.text)
-        number_of_pages = math.ceil(int(span_value)/20)
-        return number_of_pages
-
-
     def get_articles(self, url, type_articles):
-        number_of_pages = self.define_numer_of_pages(url, type_articles)
         try:
             r = requests.get(url)
         except requests.exceptions.RequestException:
@@ -199,20 +178,26 @@ class habrArticleSrcDownloader():
             return
 
         url_soup = BeautifulSoup(r.text, 'lxml')
+
         posts = url_soup.findAll('a', {'class': 'tm-title__link'})
         self.posts += posts
-        if number_of_pages > 1: 
-            for page in range(2, number_of_pages + 1):
-                try:
-                    r = requests.get(url + "page" + str(page))
-                except requests.exceptions.RequestException:
-                    print("[error]: Ошибка получения статей: ", url)
-                    return
 
-                url_soup = BeautifulSoup(r.text, 'lxml')
-                posts = url_soup.findAll('a', {'class': 'tm-title__link'})
-                self.posts += posts
+        page = 2
+        while True:
+            try:
+                r = requests.get(f'{url}page{page}')
+            except requests.exceptions.RequestException:
+                print("[error]: Ошибка получения статей: ", url)
+                return
 
+            url_soup = BeautifulSoup(r.text, 'lxml')
+            posts = url_soup.findAll('a', {'class': 'tm-title__link'})
+            self.posts += posts
+
+            if len(posts) == 0:
+                break
+
+            page += 1
 
     def parse_articles(self, type_articles):
         print(f"[info]: Будет загружено: {len(self.posts)} статей.")
@@ -288,7 +273,7 @@ if __name__ == '__main__':
         if not args.article_id:
             habrSD.main("https://habr.com/ru/users/" + output_name, output, type_articles)
         else:
-            habrSD.get_article("https://habr.com/ru/post/" + output_name, type_articles)
+            habrSD.get_article("https://habr.com/ru/post/" + output_name)
     except Exception as ex:
         print("[error]: Ошибка получения данных от :", output_name)
         print(ex)
