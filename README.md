@@ -3,25 +3,24 @@
 Скрипт python3 для скачивания исходников статей с [habr](https://habr.com/).
 Тестировал на **python 3.6.9**, под **Linux Mint 19.3**.
 
-## Как использовать:
 
-### Установка:
+## Установка
 
-#### Linux
+### Linux
 ```bash
 apt-get install python3-lxml libomp-dev
 pip3 install -r requirements.txt
 ```
 
-#### macOS
+### macOS
 ```bash
 brew install python-lxml libomp
 pip3 install -r requirements.txt
 ```
 
-### Использование:
+## Использование
 ```
-usage: main.py [-h] [-q] [-l] [-i] (-u USER_NAME_FOR_ARTICLES | -f USER_NAME_FOR_FAVORITES | -s ARTICLE_ID)
+usage: main.py [-h] [-q] [-l] [-i] [-j {1,2,3,4,5,6,7,8}] (-u USER_NAME_FOR_ARTICLES | -f USER_NAME_FOR_FAVORITES | -s ARTICLE_ID)
 
 Скрипт для скачивания статей с https://habr.com/
 
@@ -31,6 +30,8 @@ options:
   -l, --local-pictures  Использовать абсолютный путь к изображениям в сохранённых файлах
   -i, --meta-information
                         Добавить мета-информацию о статье в файл
+  -j {1,2,3,4,5,6,7,8}, --multiprocessing-cpu {1,2,3,4,5,6,7,8}
+                        Количество ядер для параллельного скачивания статей (default: 8)
   -u USER_NAME_FOR_ARTICLES
                         Скачать статьи пользователя
   -f USER_NAME_FOR_FAVORITES
@@ -84,7 +85,7 @@ options:
 ```
 
 
-#### Docker
+## Docker
 
 Сборка образа:
 
